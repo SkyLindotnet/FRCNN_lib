@@ -25,8 +25,12 @@ class general_voc(imdb):
         imdb.__init__(self, name)
         self._image_set = image_set
         self._data_path = os.path.join(cfg.ROOT_DIR, data_path)
-        self._classes = ('__background__', # always index 0
-                         'hole')  # face
+        if 'moon' in name:
+            self._classes = ('__background__', # always index 0
+                             'hole')
+        else:
+            self._classes = ('__background__',  # always index 0
+                             'face')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.jpg'
         self._image_index = self._load_image_set_index()
