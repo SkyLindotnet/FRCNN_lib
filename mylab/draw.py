@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import numpy as np
 from pylab import *
 import matplotlib.patches as patches
@@ -114,6 +116,52 @@ def draw_bbox(subplot, bboxes, color='cyan', linewidth=2, alpha=1, with_conf=Fal
                          fontsize=fontsize,
                          alpha=alpha,
                          bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': log(w + h)})
+
+
+def draw_label(subplot, bboxes, labels, color='cyan', linewidth=2, alpha=1, fontcolor=None):
+    # bbox: xmin, ymin, xmax, ymax
+    #
+    '''
+
+    :param subplot:  a subplot
+    :param bboxes:
+        bounding boxes in "xmin, ymin, xmax, ymax" order
+        expecting a list with length 4; OR a np.array with shape <n,4>
+    :param color: line color
+    :param linewidth: line width
+    :return:
+    '''
+    bboxes = np.array(bboxes)
+    if len(bboxes.shape) == 1: bboxes = np.array([bboxes])
+    for index, b in enumerate(bboxes):
+        x = b[0];
+        y = b[1]
+        w = b[2] - x
+        h = b[3] - y
+        # subplot.add_patch(patches.Rectangle(
+        #     (x, y),  # (x,y)
+        #     w,  # width
+        #     h,  # height
+        #     fill=0,
+        #     edgecolor=color,
+        #     linewidth=linewidth,
+        #     alpha=alpha
+        # ))
+        fontsize = 12
+        if fontcolor is None: fontcolor = color
+        # subplot.text(b[0], b[3] + fontsize / 2, label,
+        #              horizontalalignment='center',
+        #              verticalalignment='center',
+        #              color=fontcolor,
+        #              fontsize=fontsize,
+        #              alpha=alpha,
+        #              bbox={'facecolor': 'white', 'alpha': 0.5, 'pad': log(w + h)})
+        subplot.text(b[0] + fontsize*2, b[3] + fontsize*6*len(labels), '\n'.join([str(label[index]) for label in labels]),
+                     color=fontcolor,
+                     fontsize=fontsize,
+                     alpha=1,
+                     bbox={'facecolor': 'white', 'alpha': 0.5})
+
 
 
 def fcn_color_map(im, fg, bg, out, LA=1, RA=0):  # left alpha/right alpha
