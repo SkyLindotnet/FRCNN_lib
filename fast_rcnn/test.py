@@ -159,10 +159,10 @@ def _project_im_rois(im_rois, scales):
 def _get_blobs(im, rois):
     """Convert an image and RoIs within that image into network inputs."""
     blobs = {'data' : None, 'rois' : None}
-    if cfg.ENABLE_RON:
-        blobs['data'], im_scale_factors = _get_image_blob_ron(im)
-    else:
-        blobs['data'], im_scale_factors = _get_image_blob(im)
+    # if cfg.ENABLE_RON:
+    #     blobs['data'], im_scale_factors = _get_image_blob_ron(im)
+    # else:
+    blobs['data'], im_scale_factors = _get_image_blob(im)
     if not cfg.TEST.HAS_RPN:
         blobs['rois'] = _get_rois_blob(rois, im_scale_factors)
     return blobs, im_scale_factors
@@ -687,14 +687,14 @@ def im_detect_kp_map_by_rois(net, im, boxes=None, rois_layer='rois'):
     scale = blobs['im_info'][0, 2]
     # boxes = blobs_out['rois'][:, 1:].copy() / scale  # blobs_out
     # scores = blobs_out['scores'].copy()
-    if cfg.ENABLE_RON:
-        im_shape = im.shape[0:2]
-        im_scales = float(cfg.TEST.RON_SCALES[0]) / np.array(im_shape)
-        boxes = net.blobs[rois_layer].data[:, 1:].copy()
-        boxes[:, 0::2] = boxes[:, 0::2] / im_scales[1]
-        boxes[:, 1::2] = boxes[:, 1::2] / im_scales[0]
-    else:
-        boxes = net.blobs[rois_layer].data[:, 1:].copy() / scale  # blobs_out
+    # if cfg.ENABLE_RON:
+    #     im_shape = im.shape[0:2]
+    #     im_scales = float(cfg.TEST.RON_SCALES[0]) / np.array(im_shape)
+    #     boxes = net.blobs[rois_layer].data[:, 1:].copy()
+    #     boxes[:, 0::2] = boxes[:, 0::2] / im_scales[1]
+    #     boxes[:, 1::2] = boxes[:, 1::2] / im_scales[0]
+    # else:
+    boxes = net.blobs[rois_layer].data[:, 1:].copy() / scale  # blobs_out
     if rois_layer == 'rois':
         scores = net.blobs['rpn_scores'].data.copy()
     elif rois_layer == 'fc_rois':
@@ -851,6 +851,7 @@ def im_detect_kp_map_by_rois(net, im, boxes=None, rois_layer='rois'):
             pred_keyPoints[i] = gt_keyPoints_inv
 
     # visual_kp_boxes(im, boxes, scores, keyPoint_map, pred_keyPoints, cfg.TRAIN.MAP_offset)
+    # visual_fpn_convs(im, net.blobs)
     # visual_convs(im, net.blobs)
 
     # boxes_rpn = net.blobs['rois'].data[:, 1:].copy() / scale
@@ -1169,6 +1170,87 @@ def visual_convs(im, blobs):
     ax.set_title('conv5_3')
     plt.close('all')
 
+def visual_fpn_convs(im, blobs):
+    dic = {}
+    dic['conv3_3'] = np.mean(blobs['conv3_3'].data[0], 0)
+    dic['conv4_3'] = np.mean(blobs['conv4_3'].data[0], 0)
+    dic['conv5_1'] = np.mean(blobs['conv5_1'].data[0], 0)
+    dic['conv5_2'] = np.mean(blobs['conv5_2'].data[0], 0)
+    dic['conv5_3'] = np.mean(blobs['conv5_3'].data[0], 0)
+    dic['conv4_1'] = np.mean(blobs['conv4_1'].data[0], 0)
+    dic['conv4_2'] = np.mean(blobs['conv4_2'].data[0], 0)
+    dic['conv3_2'] = np.mean(blobs['conv3_2'].data[0], 0)
+    dic['p4'] = np.mean(blobs['p4'].data[0], 0)
+    dic['p5'] = np.mean(blobs['p5'].data[0], 0)
+    dic['p6'] = np.mean(blobs['p6'].data[0], 0)
+    dic['rpn_cls_score_4'] = np.mean(blobs['rpn_cls_score_4'].data[0], 0)
+    dic['rpn_cls_score_5'] = np.mean(blobs['rpn_cls_score_5'].data[0], 0)
+    dic['rpn_cls_score_6'] = np.mean(blobs['rpn_cls_score_6'].data[0], 0)
+    plt.figure(0)
+    ax = plt.subplot(3, 3, 1)
+    ax.imshow(im[:, :, ::-1], aspect='equal')
+    ax.set_title('img')
+    ax = plt.subplot(3, 3, 2)
+    heatmap = ax.imshow(dic['conv3_2'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv3_2')
+    ax = plt.subplot(3, 3, 3)
+    heatmap = ax.imshow(dic['conv3_3'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv3_3')
+    ax = plt.subplot(3, 3, 4)
+    heatmap = ax.imshow(dic['conv4_1'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv4_1')
+    ax = plt.subplot(3, 3, 5)
+    heatmap = ax.imshow(dic['conv4_2'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv4_2')
+    ax = plt.subplot(3, 3, 6)
+    heatmap = ax.imshow(dic['conv4_3'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv4_3')
+    ax = plt.subplot(3, 3, 7)
+    heatmap = ax.imshow(dic['conv5_1'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv5_1')
+    ax = plt.subplot(3, 3, 8)
+    heatmap = ax.imshow(dic['conv5_2'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv5_2')
+    ax = plt.subplot(3, 3, 9)
+    heatmap = ax.imshow(dic['conv5_3'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('conv5_3')
+
+    plt.figure(1)
+    ax = plt.subplot(2, 3, 1)
+    heatmap = ax.imshow(dic['p4'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('p4')
+    ax = plt.subplot(2, 3, 2)
+    heatmap = ax.imshow(dic['p5'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('p5')
+    ax = plt.subplot(2, 3, 3)
+    heatmap = ax.imshow(dic['p6'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('p6')
+    ax = plt.subplot(2, 3, 4)
+    heatmap = ax.imshow(dic['rpn_cls_score_4'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('rpn_cls_score_4')
+    ax = plt.subplot(2, 3, 5)
+    heatmap = ax.imshow(dic['rpn_cls_score_5'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('rpn_cls_score_5')
+    ax = plt.subplot(2, 3, 6)
+    heatmap = ax.imshow(dic['rpn_cls_score_6'], aspect='equal', cmap=plt.cm.jet)
+    # plt.colorbar(heatmap)
+    ax.set_title('rpn_cls_score_6')
+    plt.close('all')
+
+
 def visual_kp_boxes(im, boxes, scores, keyPoint_map, pred_keyPoints, offset_scale, subplot_x=2, subplot_y=3, threshold=0.8):
     plt.figure(0)
     boxes = boxes[np.where(scores > threshold)[0]]
@@ -1204,27 +1286,68 @@ def visual_kp_boxes(im, boxes, scores, keyPoint_map, pred_keyPoints, offset_scal
         ax.imshow(kp_map, aspect='equal', cmap=plt.cm.jet)
     plt.close('all')
 
-def visual_demos(im, boxes, scores, boxes_rpn, scores_rpn, pred_keyPoints, threshold=0.8):
-    f = plt.figure(0)
-    f.add_subplot(221)
-    plt.imshow(im[:, :, ::-1], aspect='equal')
-    subplot = f.add_subplot(222)
-    plt.imshow(im[:, :, ::-1], aspect='equal')
-    boxes_rpn = boxes_rpn[np.where(scores_rpn > threshold+0.18)[0]]
-    for box_rpn in boxes_rpn:
-        draw_bbox(subplot, box_rpn)
-    subplot = f.add_subplot(223)
-    plt.imshow(im[:, :, ::-1], aspect='equal')
-    boxes = boxes[np.where(scores > threshold)[0]]
-    for box in boxes:
-        draw_bbox(subplot, box)
-    f.add_subplot(224)
-    plt.imshow(im[:, :, ::-1], aspect='equal')
-    pred_keyPoints = pred_keyPoints[np.where(scores > threshold)[0]]
-    for i in range(len(pred_keyPoints)):
-        kp_point_x = pred_keyPoints[i].reshape(-1, 2)[:, 0]
-        kp_point_y = pred_keyPoints[i].reshape(-1, 2)[:, 1]
-        plt.plot(kp_point_x, kp_point_y, 'go', ms=3.5, alpha=1, c='r', marker='o')
+def tight_imshow(im, fig, ax):
+    # fig, ax = plt.subplots()
+    # im = im[:, :, (2, 1, 0)]
+    ax.imshow(im, aspect='equal')
+    plt.axis('off')
+    height, width, channels = im.shape
+    fig.set_size_inches(width / 100.0, height / 100.0)  # / 3.0
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0)
+    plt.margins(0, 0)
+
+def visual_demos(im, boxes, scores, boxes_rpn, scores_rpn, pred_keyPoints,
+                 threshold=0.8, vis_ori=0, vis_box=1, vis_rpnBox=0, vis_kp=1):
+    if vis_ori:
+        f = plt.figure(0)
+        f.add_subplot(221)
+        plt.imshow(im[:, :, ::-1], aspect='equal')
+        subplot = f.add_subplot(222)
+        plt.imshow(im[:, :, ::-1], aspect='equal')
+        boxes_rpn = boxes_rpn[np.where(scores_rpn > threshold+0.18)[0]]
+        for box_rpn in boxes_rpn:
+            draw_bbox(subplot, box_rpn)
+        subplot = f.add_subplot(223)
+        plt.imshow(im[:, :, ::-1], aspect='equal')
+        boxes = boxes[np.where(scores > threshold)[0]]
+        for box in boxes:
+            draw_bbox(subplot, box)
+        f.add_subplot(224)
+        plt.imshow(im[:, :, ::-1], aspect='equal')
+        pred_keyPoints = pred_keyPoints[np.where(scores > threshold)[0]]
+        for i in range(len(pred_keyPoints)):
+            kp_point_x = pred_keyPoints[i].reshape(-1, 2)[:, 0]
+            kp_point_y = pred_keyPoints[i].reshape(-1, 2)[:, 1]
+            plt.plot(kp_point_x, kp_point_y, 'go', ms=3.5, alpha=1, c='r', marker='o')
+    else:
+        imname = cfg.TRAIN.VISUAL_ANCHORS_IMG.split('/')[-1]
+        imdir = "/home/sean/workplace/221/py-R-FCN-test/data/demo/temp/%s" % cfg.TRAIN.VISUAL_ANCHORS_IMG.split('/')[-3]
+        mk_dir(imdir, 0)
+        imfile = os.path.join(imdir, imname)
+        f = plt.figure(0)
+        ax = f.add_subplot(111)
+        tight_imshow(im[:, :, ::-1], f, ax)
+        ax.set_axis_off()
+
+        if vis_rpnBox == 1:
+            boxes_rpn = boxes_rpn[np.where(scores_rpn > threshold + 0.18)[0]]
+            for box_rpn in boxes_rpn:
+                draw_bbox(ax, box_rpn)
+        if vis_box == 1:
+            boxes = boxes[np.where(scores > threshold)[0]]
+            for box in boxes:
+                draw_bbox(ax, box)
+        if vis_kp == 1:
+            pred_keyPoints = pred_keyPoints[np.where(scores > threshold)[0]]
+            for i in range(len(pred_keyPoints)):
+                kp_point_x = pred_keyPoints[i].reshape(-1, 2)[:, 0]
+                kp_point_y = pred_keyPoints[i].reshape(-1, 2)[:, 1]
+                plt.plot(kp_point_x, kp_point_y, 'go', ms=3.5, alpha=1, c='r', marker='o')
+
+        plt.savefig(imfile, dpi=300, transparent=True, bbox_inches='tight', pad_inches=0)
+        # exit(1)
     plt.close('all')
 
 
