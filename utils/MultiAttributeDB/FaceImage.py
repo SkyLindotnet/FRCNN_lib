@@ -754,7 +754,7 @@ if __name__ == '__main__':
 
     '''check after generating'''
     ls = ['/data5/dataset/MulSrcData/aflw-pifa/trainset/images/6.jpg',
-          '/data5/dataset/MulSrcData/aflw-pifa/trainset/images/30.jpg',
+          '/data5/dataset/MulSrcData/aflw-pifa/trainset/images/10.jpg',
           '/data5/dataset/MulSrcData/aflw-pifa/trainset/images/116.jpg',
           '/data5/dataset/MulSrcData/aflw-full/trainset/images/0_image00430_1.jpg',
           '/data5/dataset/MulSrcData/aflw-full/trainset/images/0_image00580_1.jpg',
@@ -777,7 +777,8 @@ if __name__ == '__main__':
         if l.find('cofw') != -1 or l.find('aflw-full') != -1:
             fi.vis_test(vis_kp_style=2)
         elif l.find('aflw-pifa') != -1:
-            fi.vis_test(vis_kp_style=1)
+            # fi.vis_test(vis_kp_style=1)
+            fi.vis_test(vis_kp_style=1, vis_text=1)
         else:
             fi.vis_test(vis_kp_style=1, vis_oribox=0)
         pass

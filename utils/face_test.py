@@ -42,7 +42,7 @@ threeHusTrainPaths = [cfg.ROOT_DIR + '/data/DB/face/300-w_face/otherDB/afw',
 
 threeHusOtherDBDir = cfg.ROOT_DIR + '/data/DB/face/300-w_face/otherDB/'
 
-kpTestDataType = 'aflw-full_train'  # cofw aflw-pifa 300W_v2(p0.2) 300W_v1 ibug common(helen_lfpw)
+kpTestDataType = '300W_v2'  # cofw aflw-pifa 300W_v2(p0.2) 300W_v1 ibug common(helen_lfpw)
                              # aflw-full aflw-frontal
 if kpTestDataType == 'ibug':
     threeHusTestDir = cfg.ROOT_DIR + '/data/DB/face/300-w_face/otherDB/ibug'  # 300w_cropped
@@ -599,15 +599,15 @@ def generate_result_v1(modelPath, prototxt, testDataSet, modelType='normal', rec
             kpAllSaveDir = os.path.join(detImageSaveDir, 'Kp_All')
             visual_result_300w_face(threeHusValAnnoImgInfos, threeHusValDetImgInfos, kpAllSaveDir)
 
-        metric = cal_cer_300w_gen(threeHusValAnnoImgInfos, threeHusValDetImgInfos, detImageSaveDir, cfg.KP_GT_MATCH_STRATEGY, reValDetImgInfos)
-        # metric = cal_cer_gen(threeHusValAnnoImgInfos, threeHusValDetImgInfos, detImageSaveDir, cfg.KP_GT_MATCH_STRATEGY, reValDetImgInfos)
+        # metric = cal_cer_300w_gen(threeHusValAnnoImgInfos, threeHusValDetImgInfos, detImageSaveDir, cfg.KP_GT_MATCH_STRATEGY, reValDetImgInfos)
+        metric = cal_cer_gen(threeHusValAnnoImgInfos, threeHusValDetImgInfos, detImageSaveDir, cfg.KP_GT_MATCH_STRATEGY, reValDetImgInfos)
         # record metric
         record_result_300w_gen(metric, metricFilePath, kpTestDataType)
 
         # compare metric
-        # if '300W' in kpTestDataType:
-        #     threeHusMetricFilePath = os.path.join(threeHusOtherMetricsDir, kpTestDataType, metricFilePath.split('/')[-1])
-        #     shutil.copyfile(metricFilePath, threeHusMetricFilePath)
+        if '300W' in kpTestDataType:
+            threeHusMetricFilePath = os.path.join(threeHusOtherMetricsDir, kpTestDataType, metricFilePath.split('/')[-1])
+            shutil.copyfile(metricFilePath, threeHusMetricFilePath)
 
         # saveFilePath = metricFilePath.replace('.txt', '.jpg')
         # plot_results(2, threeHusOtherMetricsDir, saveFilePath)
@@ -1597,6 +1597,11 @@ def loadResultFile_gen_face(threeHus_fileDir, detType='300w', withBox=0):  # fh=
     # load annotated image
     imgsInfo = {}
     for dir, subdir, files in os.walk(threeHus_fileDir):
+        if cfg.TEST.DEBUG_IMPATH != '':
+            debug_ims = loadFileList(cfg.TEST.DEBUG_IMPATH)
+            debug_files = map(lambda f: f.strip(), debug_ims)
+            files = debug_files
+            dir = cfg.TEST.DEBUG_IMPATH_DIR
         for file in files:
             if file.endswith('.pts'):
                 im_path = os.path.join(dir, file.replace('.pts', '.jpg'))
@@ -1619,16 +1624,16 @@ def loadResultFile_gen_face(threeHus_fileDir, detType='300w', withBox=0):  # fh=
                         pass
                 else:
                     imgsInfo[im_path] = results
-    if detType == 'ibug':
-        assert len(imgsInfo) == 135
-    elif '300w' in detType:
-        assert len(imgsInfo) == 600
-    elif detType == 'common':
-        assert len(imgsInfo) == 554
-    elif detType == 'aflw-full':
-        assert len(imgsInfo) == 4386
-    elif detType == 'aflw-frontal':
-        assert len(imgsInfo) == 1314
+    # if detType == 'ibug':
+    #     assert len(imgsInfo) == 135
+    # elif '300w' in detType:
+    #     assert len(imgsInfo) == 600
+    # elif detType == 'common':
+    #     assert len(imgsInfo) == 554
+    # elif detType == 'aflw-full':
+    #     assert len(imgsInfo) == 4386
+    # elif detType == 'aflw-frontal':
+    #     assert len(imgsInfo) == 1314
     return imgsInfo
 
 
@@ -4593,7 +4598,7 @@ def prepare_data_fitting(ValDetImgInfos, cacheDir, training_set, proportion, sca
         with open(trainCacheFile, 'rb') as f:
             train_images = pickle.load(f)
             # exit(1)
-    if training_set == 'alfw':
+    if kpTestDataType == 'aflw-full_train':
         test_images = random_list(test_images, 5000)
 
     return train_images, test_images
@@ -4690,12 +4695,12 @@ def aflw_fitting_shape(ValDetImgInfos, cacheDir, training_set='cofw', proportion
     # reduced outliers by pca
     # n_active_components = np.arange(22, 12, -2)
     # recordPath = recordPath[:-4] + '_a.txt'
-    n_active_components = np.arange(12, 0, -2)
-    recordPath = recordPath[:-4] + '_b.txt'
-    local_re_thresholds = np.arange(0, 1.05, 0.05)
+    # n_active_components = np.arange(12, 0, -2)
+    # recordPath = recordPath[:-4] + '_b.txt'
+    # local_re_thresholds = np.arange(0, 1.05, 0.05)
 
-    # n_active_components = [0.99]  # [26] [30]
-    # local_re_thresholds = [0.65]  # [0.65] [0.6, 0.65]
+    n_active_components = [12]  #
+    local_re_thresholds = [0.20]  #
 
     reconstructByPCA(train_images, test_images, ValDetImgInfos, n_active_components,
                      auto=0, saveDir=saveDir, local_re_thresholds=local_re_thresholds,
@@ -5509,7 +5514,7 @@ def det_model_facePlus_pyramid(prototxt, modelPath, modelType, imPaths, DetectFi
                 if not cfg.TRAIN.PREDICE_KP_MAP:
                     scores, boxes, keyPoints = im_detect_kp_by_rois(net, im, rois_layer='fc_rois')
                 else:
-                    scores, boxes, keyPoints = im_detect_kp_map_by_rois(net, im, rois_layer='fc_rois')
+                    scores, boxes, keyPoints, keyScores = im_detect_kp_map_by_rois(net, im, rois_layer='fc_rois')
             else:
                 scores, boxes, keyPoints = im_detect_facePlus(net, im.copy())
 
@@ -5565,6 +5570,9 @@ def det_model_facePlus_pyramid(prototxt, modelPath, modelType, imPaths, DetectFi
             inds = np.where(dets[:, -1] >= CONF_THRESH)[0]
             if len(inds) == 0:
                 continue
+            # visual result for demo
+            # visual_demos(im, dets[:,:-1], dets[:,-1], det_keyPoints)
+            # exit(1)
             for i in inds:
                 bbox = dets[i, :4]
                 score = dets[i, -1]
@@ -5572,7 +5580,7 @@ def det_model_facePlus_pyramid(prototxt, modelPath, modelType, imPaths, DetectFi
                 keyPoints_str = ['%f' % key for key in keyPoints]  # .1f => f
 
                 keyScores = det_keyScores[i, :]
-                keyScores_str = ['%f' % score for score in keyScores]
+                keyScores_str = ['%f' % keyScore for keyScore in keyScores]
 
                 resultList.write('{:s} {:.3f} {:f} {:f} {:f} {:f} {:s} {:s}\n'.
                                  format(im_path, score,
@@ -5581,6 +5589,60 @@ def det_model_facePlus_pyramid(prototxt, modelPath, modelType, imPaths, DetectFi
                                         ' '.join(keyPoints_str),
                                         ' '.join(keyScores_str)))
     resultList.close()
+
+def visual_demos(im, boxes, scores, pred_keyPoints,
+                 threshold=0.8, vis_box=1, vis_kp=1, td_format=0):
+
+    imname = cfg.TRAIN.VISUAL_ANCHORS_IMG.split('/')[-1]
+    imdir = "/home/sean/workplace/221/py-R-FCN-test/data/demo/temp/%s" % cfg.TRAIN.VISUAL_ANCHORS_IMG.split('/')[-3]
+    mk_dir(imdir, 0)
+    imfile = os.path.join(imdir, imname)
+    f = plt.figure(0)
+    ax = f.add_subplot(111)
+    tight_imshow(im[:, :, ::-1], f, ax)
+    ax.set_axis_off()
+
+    if vis_box == 1:
+        boxes = boxes[np.where(scores > threshold)[0]]
+        for box in boxes:
+            draw_bbox(ax, box)
+    if vis_kp == 1:
+        if td_format == 0:
+            pred_keyPoints = pred_keyPoints[np.where(scores > threshold)[0]]
+            for i in range(len(pred_keyPoints)):
+                kp_point_x = pred_keyPoints[i].reshape(-1, 2)[:, 0]
+                kp_point_y = pred_keyPoints[i].reshape(-1, 2)[:, 1]
+                plt.plot(kp_point_x, kp_point_y, 'go', ms=6, alpha=1, c='r', marker='o', markeredgecolor='black', markeredgewidth=0.7)  # [6,0.7][10,1][4.5,0.5](common) [3.5,0.5](ibug) [6,0.7](300w_test)
+        else:
+            pred_keyPoints = pred_keyPoints[np.where(scores > threshold)[0]]
+            for i in range(len(pred_keyPoints)):
+                kp_point_x = pred_keyPoints[i].reshape(-1, 2)[:, 0]
+                kp_point_y = pred_keyPoints[i].reshape(-1, 2)[:, 1]
+                if len(kp_point_x) == 34:
+                    kps_indexes = np.array([[1, 2, 3], [4, 5, 6], [7, 28, 9, 29, 7], [7, 8, 9],
+                                            [10, 30, 12, 31, 10], [10, 11, 12], [14, 15, 16, 32, 14],
+                                            [18, 33, 20, 34, 18], [18, 19, 20], [27, 13, 26, 25, 21, 24, 23, 17, 22]])
+                    for kps_index in kps_indexes:
+                        kps_index = np.array(kps_index) - 1
+                        plt.plot(kp_point_x[kps_index], kp_point_y[kps_index], ms=3.5, alpha=1, c='r', marker='o', markeredgecolor='black',
+                                 fillstyle='full', markeredgewidth=0.5, linewidth=0.5)
+    #
+    plt.savefig(imfile, transparent=True, dpi=300, bbox_inches='tight', pad_inches=0)
+    # exit(1)
+    plt.close('all')
+
+def tight_imshow(im, fig, ax):
+    # fig, ax = plt.subplots()
+    # im = im[:, :, (2, 1, 0)]
+    ax.imshow(im, aspect='equal')
+    plt.axis('off')
+    height, width, channels = im.shape
+    fig.set_size_inches(width / 100.0, height / 100.0)  # / 3.0
+    plt.gca().xaxis.set_major_locator(plt.NullLocator())
+    plt.gca().yaxis.set_major_locator(plt.NullLocator())
+    plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0)
+    plt.margins(0, 0)
+
 
 def det_model_voc_pyramid(prototxt, modelPath, modelType, im_names, vocDetectFilePath,
                           vocValImgDir, CONF_THRESH=0.8, NMS_THRESH=0.3, scales=[0],
@@ -6431,9 +6493,9 @@ if __name__ == '__main__':
 
     aps = []
     for strategyThresh in np.arange(-0.20, -0.21, -0.01):
-        for thresh in np.arange(10000, 11000, 10000):  # 0.1, 1, 0.1 100000, 0, -10000
+        for thresh in np.arange(0.1, 1, 1): #np.arange(10000, 11000, 10000):  # 0.1, 1, 0.1 100000, 0, -10000
             # region parameter initialization
-            TrainingDB = 'aflw'  # cofw aflw-pifa aflw wider_face moon face_plus threeHusFace morph
+            TrainingDB = 'threeHusFace'  # cofw aflw-pifa aflw wider_face moon face_plus threeHusFace morph
             save_dir = 'output/test_result/%s' % TrainingDB
             save_dir = os.path.join(cfg.ROOT_DIR, save_dir)
             if not os.path.exists(save_dir):
@@ -6448,13 +6510,13 @@ if __name__ == '__main__':
             cfg.TEST.USING_GT = 1
             cfg.TRANSFORM_KP_TO_BOX = 1
             cfg.FILTER_INVALID_BOX = 1
-            cfg.WIDER_FACE_STYLE = 2  # 1(for 68) 2(for 19)
+            cfg.WIDER_FACE_STYLE = 1  # 1(for 68) 2(for 19)
             cfg.CLIP_BOXES = 1
 
             # gt matching setting
             cfg.KP_GT_MATCH_STRATEGY = 2
             cfg.KP_GT_MATCH_NUM = 20
-            cfg.KP_GT_MATCH_OVERLAP = 0.01
+            cfg.KP_GT_MATCH_OVERLAP = 0.5  # thresh  # 0.5  # 0.01
             cfg.KP_GT_MATCH_COMPLETION = 0
             # cfg.KP_GT_MATCH_COMPLETION_PATH = '/home/sean/workplace/221/py-R-FCN-test/output/test_result/aflw/THs_val_Detect/VGG16_FMA_frozen_v1_aflw-full-1_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu3_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_190000_c1_n3_adapted_gt.txt'
             cfg.KP_GT_MATCH_COMPLETION_PATH = '/home/sean/workplace/221/py-R-FCN-test/output/test_result/threeHusFace/THs_val_Detect/VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2-i_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000_c1_n3_adapted_gt(fwc-1).txt'
@@ -6464,35 +6526,44 @@ if __name__ == '__main__':
             cfg.TEST.Frozen_NMS_THRESH = 0.7  # 0.7
             cfg.TEST.Frozen_PRE_NMS_TOP_N = 300  # 300 25
             cfg.TEST.Frozen_POST_NMS_TOP_N = 10  # 25
-            # cfg.TEST.Frozen_PRE_NMS_TOP_N = 25
 
             # other setting
             cfg.KP_UNDETECTED_FILL = 0
             cfg.KP_UNDETECTED_FILL_THRESH = 0.1
             cfg.KP_ADAPTED_MATCH = 1
-            cfg.KP_ENABLE_FITTING = 1
+            cfg.KP_ENABLE_FITTING = 0
             cfg.KP_VIS_KP_TEST = 0
             cfg.KP_FIRST_21_TEST = 0
 
             # custom parameters
-            # cfg.TEST.SCALES = (100,)  # 600 800 1000 1200 1400
-            # cfg.TEST.MAX_SIZE = 950  # 1000 1200 1400 1600 1800
+            # cfg.TEST.SCALES = (256,)  # 150 256 320 480 600 800 1000 1200 1400
+            # cfg.TEST.MAX_SIZE = 256  # 150 256 320 480 1000 1200 1400 1600 1800
 
             # cfg.TEST.RPN_POST_NMS_TOP_N = 10 # _ufc
             # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/COFW/train/debug.txt'
-            # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/AFLW/train/aflw-full/trainset/debug.txt'
-            # cfg.TEST.DEBUG_IMPATH_DIR = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/otherDB/aflw-full/trainset'
+            # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/AFLW/train/aflw-full/testset/demo.txt'
+            # cfg.TEST.DEBUG_IMPATH_DIR = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/otherDB/aflw-full/testset'
+            # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/COFW/test/testset/demo.txt'
+            # cfg.TEST.DEBUG_IMPATH_DIR = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/otherDB/cofw/testset'
+            # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/AFLW/train/aflw-pifa/testset/demo.txt'
+            # cfg.TEST.DEBUG_IMPATH_DIR = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/otherDB/aflw-pifa/testset'
+            cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/test/testset/demo.txt'
+            cfg.TEST.DEBUG_IMPATH_DIR = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/300w_cropped'
+            # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/test/testset/ibug_demo.txt'
+            # cfg.TEST.DEBUG_IMPATH_DIR = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/300-w_face/otherDB/ibug'
 
-            suffix = '_adapted_gt(fwc-2)_train'  # _ron_320x320_adapted _adapted _ufc _unscale_m750_PRE_N25_IBUG _unscale_m400_PRE_N1
+            suffix = '_adapted_gt(fwc-1)_demo'  # % str(thresh)
+            # fpn:_adapted_iou(0.5)_as(256x256)
+            # % str(thresh) _ron_320x320_adapted _adapted _ufc _unscale_m750_PRE_N25_IBUG _unscale_m400_PRE_N1
             # 300w-v1: _adapted_gt(fwc-1)_300w-v1 _unscale_m1800_adapted_gt(fwc-1)_300w-v1
-            # aflw-full: _adapted_gt _undetfill(0.1)_adapted_pnms(0.7-300-15)_s2 _adapted_gt(fwc-2)
-            # aflw_frontal: _adapted_gt _adapted_gt(fwc-2)_frontal
-            # aflw-pifa: _adapted_gt(fwc-1)
-            # cofw: _adapted_gt(fwc-2)
-            # 300w-v2: _adapted_gt(fwc-1) _undetfill(0.1)_adapted_pnms(0.7-300-10)
+            # aflw-full: _adapted_gt(fwc-2) _undetfill(0.1)_adapted_pnms(0.7-300-15)_iou(%s)
+            # aflw_frontal: _adapted_gt(fwc-2)_frontal _undetfill(0.1)_adapted_pnms(0.7-300-10)_iou(%s)_frontal
+            # aflw-pifa: _adapted_gt(fwc-1) _undetfill(0.1)_adapted_pnms(0.7-300-10)_iou(%s)
+            # cofw: _adapted_gt(fwc-2) _adapted_pnms(0.7-300-10)_iou(%s)
+            # 300w-v2: _adapted_gt(fwc-1) _adapted_pnms(0.7-300-10)_iou(%s)
             # 300W_v2(p0.2): _adapted_gt(fwc-1) _adapted_gt(fwc-1)_300W_v2(p0.2)_s300
-            # ibug: _adapted_gt(fwc-1)_ibug _undetfill(0.8)_adapted_ibug _undetfill(0.1)_adapted_pnms(0.7-300-25)
-            # common: _adapted_gt(fwc-1)_common
+            # ibug: _adapted_gt(fwc-1)_ibug _adapted_pnms(0.7-300-25)_iou(%s)_ibug
+            # common: _adapted_gt(fwc-1)_common _adapted_pnms(0.7-300-10)_iou(%s)_common
             # _undetfill(0.1)_adapted _adapted_common _undetectedPro_adapted_N25_ibug _unscale_m400_undetfill_adapted _unscale_m550_undetectedPro_adapted
             ''' wider face '''
             # method = 'VGG16_faster_rcnn_stage4_iter_40000_v3'
@@ -6553,9 +6624,15 @@ if __name__ == '__main__':
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha2_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_mask-1_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_140000'
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha1-1_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha1-1_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
-            # method = 'VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2-i_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
-            # method = 'VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
 
+            method = 'Temp_VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_iter_2_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_m0.5_2_1_s2-roi-norm-10-8-5'
+            # method = 'VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
+            # method = 'VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2-i_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
+            # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu3_dc3(-GC-MSC-MLC)_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
+            # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu1_dc3(-GC-MSC)_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
+            # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu0_dc3(-GC)_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
+
+            # method = 'Temp_VGG16_ms-fpn_frozen_iter_2_v1_lha5-re-1(fwc)_fpn_v1-2-r3(4-5-6d_2)_fcn-5-1_1_b4_s1_2_fm(0.8)(nms_0.7)_p345(14-11-9)-c-norm_fuse_4_dc3-r_as(256x256)'
             # method = 'VGG16-ms-rpns-v2-reduce_3(4-5-6)(norm)-ar(1)_640x640_st(ssh1)_iter_120000'
             # method = 'VGG16-ms-fpns-v1-2-reduce_3(4-5-6)(norm)_640x640_st(ssh1)_iter_160000'
             # method = 'VGG16_ms-fpn_frozen_v1_lha1_fpn_v1-2-r3(4-5-6)_fcn-5-1_1_b4_s1_2_fm(0.8)_p345(14-11-9)-c-norm_fuse_4_dc3-r_320x320_iter_80000'
@@ -6563,7 +6640,7 @@ if __name__ == '__main__':
 
             '''aflw'''
             # method = 'VGG16_FMA_frozen_v1_aflw-full-1_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu3_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_190000'
-            method = 'VGG16_FMA_frozen_v1_aflw-full-1(fwc-2)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_190000'
+            # method = 'VGG16_FMA_frozen_v1_aflw-full-1(fwc-2)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_190000'
 
             '''aflw-pifa'''
             # method = 'VGG16_FMA_frozen_v1_aflw-pifa-1(fwc-1)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu3_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
@@ -6590,8 +6667,8 @@ if __name__ == '__main__':
             # method = 'VGG16_faster_rcnn_end2end_with_multianchor_iter_20000_v3'
 
             modelDir = 'model'
-            testDataSet = 'aflw-full'  # cofw aflw-pifa aflw-full threeHusFace+ wider FDDB Face_Plus threeHusFace Face_Plus_v1 morph moon
-            cfg.TRAIN.ATTRIBUTES = [{'gt_keyPoints': 38}]  # aflw
+            testDataSet = 'threeHusFace+'  # cofw aflw-pifa aflw-full threeHusFace+ wider FDDB Face_Plus threeHusFace Face_Plus_v1 morph moon
+            # cfg.TRAIN.ATTRIBUTES = [{'gt_keyPoints': 38}]  # aflw
             # cfg.TRAIN.ATTRIBUTES = [{'gt_keyPoints': 68}]  # aflw-pifa
             # cfg.TRAIN.ATTRIBUTES = [{'gt_keyPoints': 58}]  # cofw
 
@@ -6627,8 +6704,13 @@ if __name__ == '__main__':
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-1-1_t1_s2-rois-norm-10-8-5.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_fuse_2-norm-d1-2_dc2.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dc3.prototxt'
-            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
 
+            prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3(-GC-MSC-MLC).prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3(-GC-MSC).prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3(-GC).prototxt'
+
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_ms-fpns-v1-2-reduce_3(4-5-6d_2)(norm)_adapt_frozen_fcn-5-1_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_rpn_v2_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dc3.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fpn_v1-2(4-5-6)_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_ms-fpns-v1-2-reduce_3(4-5-6)(norm)_frozen_fcn-5-1_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
@@ -6644,7 +6726,7 @@ if __name__ == '__main__':
             # prototxt = 'VGG16/faster_rcnn_end2end/test_multianchor_v3.prototxt'
 
             ''' aflw '''
-            prototxt = 'VGG16/faster_rcnn_end2end/19_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/19_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
 
             ''' aflw-pifa'''
             # prototxt = 'VGG16/faster_rcnn_end2end/34_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
@@ -6770,7 +6852,7 @@ if __name__ == '__main__':
             # main run
             timer = Timer()
             timer.tic()
-            metricList = generate_result_v1(modelPath, prototxt, testDataSet, methodType, recompute=0,
+            metricList = generate_result_v1(modelPath, prototxt, testDataSet, methodType, recompute=1,
                                             CONF_THRESH=CONF_THRESH, NMS_THRESH=NMS_THRESH,
                                             visual=0, recordIMFP=0, Adapter=Adapter,
                                             segModelPath=segModelPath, segPrototxt=segPrototxt,
