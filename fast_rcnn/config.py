@@ -54,7 +54,7 @@ __C.KP_FITTING_MODEL = 'AAM'
 __C.KP_FITTING_DETDIR = ''
 
 # RON
-__C.ENABLE_RON = 0
+__C.ENABLE_RON = 1
 if __C.ENABLE_RON:
     __C.TRAIN.NOBORDER = 0
     __C.TRAIN.PROB = 0.8  # 0.8 0.7
@@ -80,6 +80,10 @@ if __C.ENABLE_RON:
     # __C.USED_RPN_NO = ['5', '4', '3']
     # __C.TRAIN.MULTI_SCALE_RPN_SCALE = [[16, 32], [8, 16], [4, 8]]
 
+    __C.MULTI_SCALE_RPN_NO = ['5']
+    __C.USED_RPN_NO = ['5']
+    __C.TRAIN.MULTI_SCALE_RPN_SCALE = [[1, 2, 4, 8, 16, 32]]
+
 
 # multi-scale RPN
 __C.TRAIN.MULTI_SCALE_RPN = 0
@@ -96,6 +100,13 @@ if __C.TRAIN.MULTI_SCALE_RPN:
     # __C.TRAIN.MULTI_SCALE_RPN_POST_NMS_TOP_Ns = [2000, 2000, 2000]
     __C.TRAIN.MULTI_SCALE_RPN_PRE_NMS_TOP_Ns = [12000, 12000]
     __C.TRAIN.MULTI_SCALE_RPN_POST_NMS_TOP_Ns = [2000, 2000]
+
+    # __C.TRAIN.MULTI_SCALE_RPN_NUM = 1
+    # __C.TRAIN.MULTI_SCALE_RPN_SCALE = [[1, 2, 4, 8, 16, 32]]
+    # __C.TRAIN.MULTI_SCALE_RPN_STRIDE = [16]
+    # __C.TRAIN.MULTI_SCALE_RPN_PRE_NMS_TOP_Ns = [12000]
+    # __C.TRAIN.MULTI_SCALE_RPN_POST_NMS_TOP_Ns = [2000]
+
 
 # shuffle heterology data
 __C.TRAIN.shuffle_heterology = 0
@@ -464,7 +475,7 @@ if __C.ENABLE_RON:
     __C.TEST.NMS = 0.3  #
     __C.TEST.PRE_RON_NMS_TOP_N = 300  # 300
     __C.TEST.RON_NMS_TOP_N = 10  # if ENABLE_NMS
-    __C.TEST.RON_SCALES = (320,)  # 320 480 540 640
+    # __C.TEST.RON_SCALES = (320,)  # 320 480 540 640
 
 # image save dir
 __C.TEST.IMAGE_SAVE_DIR = ''

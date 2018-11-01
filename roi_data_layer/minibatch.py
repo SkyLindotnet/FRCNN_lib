@@ -40,11 +40,11 @@ def visual_attribute(im_path, scale, gt_boxes, blobs, Flipped=True, fontsize=12,
         im = im[:, ::-1, :]
     ax.imshow(im[:, :, ::-1], aspect='equal')
     ax = plt.subplot(1, 2, 2)
-    if cfg.ENABLE_RON:
-        im = cv2.resize(im, None, None, fx=scale[0], fy=scale[1],
-                        interpolation=cv2.INTER_LINEAR)
-    else:
-        im = cv2.resize(im, None, None, fx=scale, fy=scale,
+    # if cfg.ENABLE_RON:
+    #     im = cv2.resize(im, None, None, fx=scale[0], fy=scale[1],
+    #                     interpolation=cv2.INTER_LINEAR)
+    # else:
+    im = cv2.resize(im, None, None, fx=scale, fy=scale,
                 interpolation=cv2.INTER_LINEAR)
     ax.imshow(im[:, :, ::-1], aspect='equal')
 
@@ -108,26 +108,26 @@ def get_minibatch(roidb, num_classes):
         # gt boxes: (x1, y1, x2, y2, cls)
         gt_inds = np.where(roidb[0]['gt_classes'] != 0)[0]
         gt_boxes = np.empty((len(gt_inds), 5), dtype=np.float32)
-        if cfg.ENABLE_RON:
-            boxes = roidb[0]['boxes'][gt_inds, :].copy()
-            boxes[:, 0::2] = boxes[:, 0::2] * im_scales[0][0]
-            boxes[:, 1::2] = boxes[:, 1::2] * im_scales[0][1]
-            gt_boxes[:, 0:4] = boxes
-            # not need to save scale if ENABLE_RON
-            blobs['im_info'] = np.array(
-                [[im_blob.shape[2], im_blob.shape[3], -1]],
-                dtype=np.float32)
+        # if cfg.ENABLE_RON:
+        #     boxes = roidb[0]['boxes'][gt_inds, :].copy()
+        #     boxes[:, 0::2] = boxes[:, 0::2] * im_scales[0][0]
+        #     boxes[:, 1::2] = boxes[:, 1::2] * im_scales[0][1]
+        #     gt_boxes[:, 0:4] = boxes
+        #     # not need to save scale if ENABLE_RON
+        #     blobs['im_info'] = np.array(
+        #         [[im_blob.shape[2], im_blob.shape[3], -1]],
+        #         dtype=np.float32)
+        # else:
+        if cfg.TRANSFORM_KP_TO_BOX:
+            gt_boxes[:, 0:4] = transform_kp_to_box(roidb[0]['gt_keyPoints'][gt_inds, :],
+                                                   roidb[0]['boxes'][gt_inds, :],
+                                                   roidb[0]['image']) * im_scales[0]
         else:
-            if cfg.TRANSFORM_KP_TO_BOX:
-                gt_boxes[:, 0:4] = transform_kp_to_box(roidb[0]['gt_keyPoints'][gt_inds, :],
-                                                       roidb[0]['boxes'][gt_inds, :],
-                                                       roidb[0]['image']) * im_scales[0]
-            else:
-                gt_boxes[:, 0:4] = roidb[0]['boxes'][gt_inds, :] * im_scales[0]
+            gt_boxes[:, 0:4] = roidb[0]['boxes'][gt_inds, :] * im_scales[0]
 
-            blobs['im_info'] = np.array(
-                [[im_blob.shape[2], im_blob.shape[3], im_scales[0]]],
-                dtype=np.float32)
+        blobs['im_info'] = np.array(
+            [[im_blob.shape[2], im_blob.shape[3], im_scales[0]]],
+            dtype=np.float32)
 
         gt_boxes[:, 4] = roidb[0]['gt_classes'][gt_inds]
         blobs['gt_boxes'] = gt_boxes
@@ -141,13 +141,13 @@ def get_minibatch(roidb, num_classes):
                 blobs[attributeName].fill(-1)
                 if attributeName in roidb[0].keys():
                     if attributeName == 'gt_keyPoints':
-                        if cfg.ENABLE_RON:
-                            gt_kp = roidb[0][attributeName][gt_inds, :].copy()
-                            gt_kp[:, 0::2] = gt_kp[:, 0::2] * im_scales[0][0]
-                            gt_kp[:, 1::2] = gt_kp[:, 1::2] * im_scales[0][1]
-                            blobs[attributeName] = gt_kp
-                        else:
-                            blobs[attributeName] = roidb[0][attributeName][gt_inds, :] * im_scales[0]
+                        # if cfg.ENABLE_RON:
+                        #     gt_kp = roidb[0][attributeName][gt_inds, :].copy()
+                        #     gt_kp[:, 0::2] = gt_kp[:, 0::2] * im_scales[0][0]
+                        #     gt_kp[:, 1::2] = gt_kp[:, 1::2] * im_scales[0][1]
+                        #     blobs[attributeName] = gt_kp
+                        # else:
+                        blobs[attributeName] = roidb[0][attributeName][gt_inds, :] * im_scales[0]
                     else:
                         blobs[attributeName] = roidb[0][attributeName][gt_inds]
             # else:
@@ -550,10 +550,10 @@ def _get_image_blob(roidb, scale_inds):
         else:
             target_size = cfg.TRAIN.SCALES[scale_inds[i]]
         # mean subtract and scale
-        if cfg.ENABLE_RON:
-            im, im_scale = prep_im_for_blob_ron(im, cfg.PIXEL_MEANS, target_size)
-        else:
-            im, im_scale = prep_im_for_blob(im, cfg.PIXEL_MEANS, target_size,
+        # if cfg.ENABLE_RON:
+        #     im, im_scale = prep_im_for_blob_ron(im, cfg.PIXEL_MEANS, target_size)
+        # else:
+        im, im_scale = prep_im_for_blob(im, cfg.PIXEL_MEANS, target_size,
                                         cfg.TRAIN.MAX_SIZE)
         im_scales.append(im_scale)
         processed_ims.append(im)

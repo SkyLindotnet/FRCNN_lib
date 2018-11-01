@@ -295,7 +295,8 @@ class SolverWrapper(object):
                                               allLoss)
                     self.recordLossFile.write('%s\n' % cfg.TRAIN.VISUAL_ANCHORS_IMG)
                   elif self.solver_param.snapshot_prefix == 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen' or \
-                       self.solver_param.snapshot_prefix == 'VGG16_ms-fpn_frozen':
+                       self.solver_param.snapshot_prefix == 'VGG16_ms-fpn_frozen' or \
+                       self.solver_param.snapshot_prefix == 'VGG16_ms-rpn_frozen':
                       allLoss = net.blobs['loss_keyPoint'].data
                       self.recordLossFile.write(methodName+' '+'loss_keyPoint %.8f' %
                                                   net.blobs['loss_keyPoint'].data+' '+'all_loss %.8f\n' %

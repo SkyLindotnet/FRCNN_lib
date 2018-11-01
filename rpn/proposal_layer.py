@@ -668,6 +668,7 @@ class ProposalLayer(caffe.Layer):
         """This layer does not propagate gradients."""
         pass
 
+
     def reshape(self, bottom, top):
         """Reshaping happens during the call to forward."""
         pass

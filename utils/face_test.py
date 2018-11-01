@@ -243,7 +243,7 @@ def generate_result_gen_val(modelPath, prototxt, methodName, testDataSet, valImg
 
     vocValDetectFilePath = cfg.ROOT_DIR + '/data/DB/face/temp/temp_%s.txt' % methodName
     # load initial parameter
-    gpu_id = 1
+    gpu_id = 2
     cfg.TEST.HAS_RPN = True
     # initialize net
     caffe.set_mode_gpu()
@@ -6536,8 +6536,8 @@ if __name__ == '__main__':
             cfg.KP_FIRST_21_TEST = 0
 
             # custom parameters
-            # cfg.TEST.SCALES = (256,)  # 150 256 320 480 600 800 1000 1200 1400
-            # cfg.TEST.MAX_SIZE = 256  # 150 256 320 480 1000 1200 1400 1600 1800
+            # cfg.TEST.SCALES = (720,)  # 150 256 320 480 600 800 1000 1200 1400
+            # cfg.TEST.MAX_SIZE = 720  # 150 256 320 480 1000 1200 1400 1600 1800
 
             # cfg.TEST.RPN_POST_NMS_TOP_N = 10 # _ufc
             # cfg.TEST.DEBUG_IMPATH = '/home/sean/workplace/221/py-R-FCN-test/data/DB/face/COFW/train/debug.txt'
@@ -6625,14 +6625,18 @@ if __name__ == '__main__':
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha1-1_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha1-1_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
 
-            method = 'Temp_VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_iter_2_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_m0.5_2_1_s2-roi-norm-10-8-5'
+            # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_v1_lha5-re(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu1_dc3_m0.5_2_1_s2-roi-norm-10-8-5_iter_60000'
+            # method = 'Temp_VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_iter_2_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_m0.5_2_1_s2-roi-norm-10-8-5'
             # method = 'VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
             # method = 'VGG16_FMA_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu2-i_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu3_dc3(-GC-MSC-MLC)_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu1_dc3(-GC-MSC)_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
             # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p345(14-11-9)-c-norm_fuse_4_dh-4(d)-gpu0_dc3(-GC)_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_160000'
 
-            # method = 'Temp_VGG16_ms-fpn_frozen_iter_2_v1_lha5-re-1(fwc)_fpn_v1-2-r3(4-5-6d_2)_fcn-5-1_1_b4_s1_2_fm(0.8)(nms_0.7)_p345(14-11-9)-c-norm_fuse_4_dc3-r_as(256x256)'
+            # method = 'VGG16_faster_rcnn_end2end_with_fuse_multianchor_frozen_v1_lha5-re-1(fwc)_w2-4-1-fcn-5-1_1_b4_s1_2_fm_p3(14)-normal(s)-1-gpu1_dc3_fp3_v3-10_m0.5_2_1_s2-roi-norm-10-8-5_iter_80000'
+            # method = 'VGG16_ms-rpn_frozen_v1_lha5-re-3(fwc)_rpn_v3-r1(5)_fcn-5-1_1_b4_s1_2_fm(0.8)(nms_0.7)_p3(14)-norm-1-gpu2_dc3_as[256x256]_re_iter_80000'
+            # method = 'Temp_VGG16_ms-rpn_frozen_iter_4_v1_lha5-re-1(fwc)_rpn_v2-r1(5)_fcn-5-1_1_b4_s1_2_fm(0.8)(nms_0.7)_p3(14)-norm-1-gpu1_dc3_as[640x640]'
+            method = 'Temp_VGG16_ms-fpn_frozen_iter_2_v1_lha5-re-1(fwc)_fpn_v1-2-r3(4-5-6d_2)_fcn-5-1_1_b4_s1_2_fm(0.8)(nms_0.7)_p345(14-11-9)-c-norm_fuse_4_dc3-r_as(256x256)'
             # method = 'VGG16-ms-rpns-v2-reduce_3(4-5-6)(norm)-ar(1)_640x640_st(ssh1)_iter_120000'
             # method = 'VGG16-ms-fpns-v1-2-reduce_3(4-5-6)(norm)_640x640_st(ssh1)_iter_160000'
             # method = 'VGG16_ms-fpn_frozen_v1_lha1_fpn_v1-2-r3(4-5-6)_fcn-5-1_1_b4_s1_2_fm(0.8)_p345(14-11-9)-c-norm_fuse_4_dc3-r_320x320_iter_80000'
@@ -6705,12 +6709,14 @@ if __name__ == '__main__':
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_fuse_2-norm-d1-2_dc2.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dc3.prototxt'
 
-            prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3(-GC-MSC-MLC).prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3(-GC-MSC).prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dh-4(d)_dc3(-GC).prototxt'
 
-            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_ms-fpns-v1-2-reduce_3(4-5-6d_2)(norm)_adapt_frozen_fcn-5-1_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fuse_multianchor_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p3(14)-normal(s)-1_dc3.prototxt'
+            # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_ms-rpns-v3-reduce_1(5)_frozen_fcn-5-1_p3(14)-norm-1_dc3.prototxt'
+            prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_ms-fpns-v1-2-reduce_3(4-5-6d_2)(norm)_adapt_frozen_fcn-5-1_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_rpn_v2_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dc3.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_fpn_v1-2(4-5-6)_frozen_v2-4-1-fcn-5-1_t1_s2-rois-norm-10-8-5_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
             # prototxt = 'VGG16/faster_rcnn_end2end/68_keyPoints/test_ms-fpns-v1-2-reduce_3(4-5-6)(norm)_frozen_fcn-5-1_p345(14-11-9)-c-norm_fuse_4_dc3-r.prototxt'
