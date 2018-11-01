@@ -26,6 +26,8 @@ from datasets.moon import moon
 #
 # __sets['st_face'] = st_face
 
+__sets['deep_moon'] = (lambda name='deep_moon', split='train': general_voc(name, split, 'data/DeepMoon'))
+
 __sets['voc_moon'] = (lambda name='voc_moon', split='train': general_voc(name, split, 'data/MOONdevkit'))
 
 __sets['voc_wider'] = (lambda name='voc_wider', split='train': general_voc(name, split, '../data/DB/object/voc_wider'))

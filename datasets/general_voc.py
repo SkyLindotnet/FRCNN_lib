@@ -27,7 +27,7 @@ class general_voc(imdb):
         self._data_path = os.path.join(cfg.ROOT_DIR, data_path)
         if 'moon' in name:
             self._classes = ('__background__', # always index 0
-                             'hole')
+                             'crater')
         else:
             self._classes = ('__background__',  # always index 0
                              'face')

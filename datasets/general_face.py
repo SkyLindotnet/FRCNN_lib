@@ -146,7 +146,8 @@ class general_face(imdb):
                         break
                     image_index.append(impath.strip())
             else:
-                image_index = [x.strip() for x in f.readlines()]
+                rootdir = cfg.ROOT_DIR
+                image_index = [os.path.join(rootdir, x.strip()) for x in f.readlines()]
         return image_index
 
     def _get_default_path(self):

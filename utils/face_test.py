@@ -243,7 +243,7 @@ def generate_result_gen_val(modelPath, prototxt, methodName, testDataSet, valImg
 
     vocValDetectFilePath = cfg.ROOT_DIR + '/data/DB/face/temp/temp_%s.txt' % methodName
     # load initial parameter
-    gpu_id = 1
+    gpu_id = 2
     cfg.TEST.HAS_RPN = True
     # initialize net
     caffe.set_mode_gpu()

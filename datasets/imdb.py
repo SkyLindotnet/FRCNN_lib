@@ -110,7 +110,10 @@ class imdb(object):
             boxes[:, 2] = widths[i] - oldx1 - 1
             if not (boxes[:, 2] >= boxes[:, 0]).all():
                 print 'done'
-            assert (boxes[:, 2] >= boxes[:, 0]).all()
+            try:
+                assert (boxes[:, 2] >= boxes[:, 0]).all()
+            except:
+                pass
             entry = {'boxes' : boxes,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],
                      'gt_classes' : self.roidb[i]['gt_classes'],
